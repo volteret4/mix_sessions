@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mix Sessions</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <h1>Mix Sessions</h1>
+</header>
+
+<main>
+  <section id="player" hidden>
+    <p class="eyebrow" id="session-date"></p>
+    <h2 id="session-title"></h2>
+    <p class="now" id="now-playing">&nbsp;</p>
+    <div class="timeline" id="timeline"></div>
+    <audio id="audio" controls preload="metadata"></audio>
+    <ol class="tracks" id="tracks"></ol>
+  </section>
+
+  <section>
+    <h3>Sesiones</h3>
+    <ul class="sessions" id="sessions"></ul>
+  </section>
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>
