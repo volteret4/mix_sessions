@@ -1,4 +1,4 @@
-FILE "2026-10-27_13h52m59s.flac" WAVE
+FILE "2026-10-27_13h52m59s.mp3" MP3
   TRACK 01 AUDIO
     TITLE "Runaround Sue"
     PERFORMER "Dion"

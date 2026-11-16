@@ -1,4 +1,4 @@
-FILE "2026-11-16_18h20m33s.flac" WAVE
+FILE "2026-11-16_18h20m33s.mp3" MP3
   TRACK 01 AUDIO
     TITLE "A Horse With No Name"
     PERFORMER "America"
