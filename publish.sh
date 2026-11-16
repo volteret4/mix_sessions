@@ -82,8 +82,17 @@ jq --arg id "$id" --arg title "$title" --arg date "$date" \
     | sort_by(.date) | reverse' sessions.json > "$work/sessions.json"
 mv "$work/sessions.json" sessions.json
 
+# pepecono también hace push (completar.py): traer sus cambios antes
+git pull -q --rebase --autostash
 git add sessions.json "sessions/$id.cue" covers
 git commit -m "Sesión $id: $title"
 git push
+
+echo "→ Buscando año y sello originales en pepecono..."
+if ssh -o ConnectTimeout=10 pepecono 'cd ~/gits/pollo/mix_sessions && ~/Scripts/python_venv/bin/python completar.py'; then
+    git pull -q --rebase
+else
+    echo "  ⚠ no se pudo completar ahora; lo hará el cron diario de pepecono" >&2
+fi
 
 echo "✓ Publicada: https://${repo%%/*}.github.io/${repo#*/}/#$id"
