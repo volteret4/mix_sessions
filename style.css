@@ -111,3 +111,25 @@ audio { width: 100%; margin: 12px 0 8px; }
 }
 .sessions a:hover .s-title, .sessions a.active .s-title { color: var(--accent); }
 .sessions .s-meta { color: var(--muted); font-size: .85rem; white-space: nowrap; }
+
+/* Grupos y etiquetas */
+.sessions li.group { margin: 18px 0 4px; padding: 0; border: 0; color: var(--muted); font-size: .75rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
+.sessions li.group:first-child { margin-top: 0; }
+.s-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+.s-tags:empty { display: none; }
+.tag { padding: 0 8px; border-radius: 99px; background: var(--accent-soft); color: var(--accent); font-size: .75rem; }
+.tags-filter { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 12px; }
+.tags-filter[hidden] { display: none; }
+.chip { min-height: 32px; padding: 2px 12px; border: 1px solid var(--line); border-radius: 99px; background: var(--surface); color: var(--muted); font: inherit; font-size: .85rem; cursor: pointer; }
+.chip.active { border-color: var(--accent); color: var(--text); background: var(--accent-soft); }
+
+/* Modo edición (editor.py) */
+.editor-bar { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin: 0 0 12px; padding: 10px 12px; border: 1px dashed var(--accent); border-radius: 8px; }
+.editor-bar span { color: var(--muted); font-size: .85rem; flex: 1; }
+.editor-bar button { padding: 6px 14px; border: 0; border-radius: 6px; background: var(--accent); color: #fff; font: inherit; font-weight: 600; cursor: pointer; }
+.editor-bar button:disabled { opacity: .6; }
+.edit { display: grid; grid-template-columns: 2fr 1fr 2fr; gap: 6px; padding: 6px 0 10px; }
+.edit input { min-width: 0; padding: 5px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--text); font: inherit; font-size: .85rem; }
+@media (max-width: 560px) { .edit { grid-template-columns: 1fr; } }
+.sessions a { flex-wrap: wrap; }
+.sessions a .s-tags { flex-basis: 100%; }

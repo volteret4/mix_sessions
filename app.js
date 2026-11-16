@@ -34,14 +34,104 @@ function trackEnd(i) {
   return i + 1 < tracks.length ? tracks[i + 1].start : audio.duration || current.duration;
 }
 
-function renderSessions() {
-  $("sessions").innerHTML = "";
-  for (const s of sessions) {
-    const li = document.createElement("li");
-    li.innerHTML = `<a href="#${s.id}"><span class="s-title"></span><span class="s-meta">${fmtDate(s.date)} · ${fmt(s.duration)}</span></a>`;
-    li.querySelector(".s-title").textContent = s.title;
-    $("sessions").append(li);
+// Grupos y etiquetas (opcionales en sessions.json: "group" y "tags").
+// Con window.MIX_EDITOR (lo pone editor.py) cada sesión se puede editar y guardar.
+let activeTag = null;
+
+function sessionItem(s) {
+  const li = document.createElement("li");
+  li.innerHTML = `<a href="#${s.id}"><span class="s-title"></span><span class="s-meta">${fmtDate(s.date)} · ${fmt(s.duration)}</span><span class="s-tags"></span></a>`;
+  li.querySelector(".s-title").textContent = s.title;
+  for (const t of s.tags || []) {
+    const b = document.createElement("span");
+    b.className = "tag";
+    b.textContent = t;
+    li.querySelector(".s-tags").append(b);
   }
+  if (window.MIX_EDITOR) li.append(editorRow(s));
+  return li;
+}
+
+function renderTags() {
+  const box = $("tags");
+  if (!box) return;
+  const all = [...new Set(sessions.flatMap((s) => s.tags || []))].sort((a, b) => a.localeCompare(b, "es"));
+  box.innerHTML = "";
+  box.hidden = !all.length;
+  for (const t of all) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "chip" + (t === activeTag ? " active" : "");
+    b.setAttribute("aria-pressed", String(t === activeTag));
+    b.textContent = t;
+    b.onclick = () => { activeTag = activeTag === t ? null : t; renderSessions(); };
+    box.append(b);
+  }
+}
+
+function renderSessions() {
+  renderTags();
+  const list = $("sessions");
+  list.innerHTML = "";
+  const shown = sessions.filter((s) => !activeTag || (s.tags || []).includes(activeTag));
+  const groups = [...new Set(shown.map((s) => s.group || ""))];
+  // Sin grupos, lista simple; con grupos, un encabezado por grupo y «Otras» al final.
+  groups.sort((a, b) => (a === "") - (b === "") || a.localeCompare(b, "es"));
+  for (const g of groups) {
+    if (groups.length > 1 || g) {
+      const h = document.createElement("li");
+      h.className = "group";
+      h.textContent = g || "Otras";
+      list.append(h);
+    }
+    for (const s of shown.filter((x) => (x.group || "") === g)) list.append(sessionItem(s));
+  }
+  if (current) document.querySelectorAll(".sessions a").forEach((a) => a.classList.toggle("active", a.hash === "#" + current.id));
+}
+
+// ── Modo edición (editor.py) ─────────────────────────────────────────────────
+function editorRow(s) {
+  const f = document.createElement("div");
+  f.className = "edit";
+  f.innerHTML = `<input class="e-title" aria-label="Título"><input class="e-group" list="group-list" aria-label="Grupo" placeholder="Grupo"><input class="e-tags" aria-label="Etiquetas" placeholder="etiquetas, separadas, por comas">`;
+  f.querySelector(".e-title").value = s.title;
+  f.querySelector(".e-group").value = s.group || "";
+  f.querySelector(".e-tags").value = (s.tags || []).join(", ");
+  f.oninput = () => {
+    s.title = f.querySelector(".e-title").value.trim() || s.title;
+    const g = f.querySelector(".e-group").value.trim();
+    if (g) s.group = g; else delete s.group;
+    const tags = f.querySelector(".e-tags").value.split(",").map((t) => t.trim()).filter(Boolean);
+    if (tags.length) s.tags = [...new Set(tags)]; else delete s.tags;
+    $("save-state").textContent = "Cambios sin guardar";
+  };
+  f.onchange = () => renderTags();
+  return f;
+}
+
+function setupEditor() {
+  const bar = document.createElement("div");
+  bar.className = "editor-bar";
+  bar.innerHTML = `<b>Modo edición</b><span id="save-state"></span><button type="button" id="save">Guardar y publicar</button><datalist id="group-list"></datalist>`;
+  $("sessions").before(bar);
+  const refreshGroups = () => {
+    $("group-list").innerHTML = "";
+    for (const g of new Set(sessions.map((s) => s.group).filter(Boolean))) $("group-list").append(new Option(g));
+  };
+  refreshGroups();
+  $("save").onclick = async () => {
+    $("save").disabled = true;
+    $("save-state").textContent = "Guardando y publicando…";
+    try {
+      const r = await fetch("api/sessions", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(sessions) });
+      const d = await r.json();
+      $("save-state").textContent = d.ok ? d.message : "Error: " + d.error;
+      if (d.ok) { refreshGroups(); renderSessions(); }
+    } catch (e) {
+      $("save-state").textContent = "Error: " + e.message;
+    }
+    $("save").disabled = false;
+  };
 }
 
 async function load(id) {
@@ -151,6 +241,7 @@ fetch("sessions.json", { cache: "no-cache" })
   .then((r) => r.json())
   .then((data) => {
     sessions = data;
+    if (window.MIX_EDITOR) setupEditor();
     renderSessions();
     load(location.hash.slice(1));
   });
