@@ -74,13 +74,15 @@ audio="https://github.com/$repo/releases/download/$id/$id.mp3"
 
 echo "→ Actualizando sessions.json..."
 sed "s/^FILE .*/FILE \"$id.mp3\" MP3/" "$cue" > "sessions/$id.cue"
+echo "→ Añadiendo género, sello, año y portada a los temas..."
+python3 enrich.py "sessions/$id.cue"
 jq --arg id "$id" --arg title "$title" --arg date "$date" \
    --argjson duration "$duration" --arg audio "$audio" \
    '[.[] | select(.id != $id)] + [{id: $id, title: $title, date: $date, duration: $duration, audio: $audio}]
     | sort_by(.date) | reverse' sessions.json > "$work/sessions.json"
 mv "$work/sessions.json" sessions.json
 
-git add sessions.json "sessions/$id.cue"
+git add sessions.json "sessions/$id.cue" covers
 git commit -m "Sesión $id: $title"
 git push
 

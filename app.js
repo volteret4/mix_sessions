@@ -11,8 +11,10 @@ function parseCue(text) {
   for (const line of text.split(/\r?\n/)) {
     const l = line.trim();
     let m;
-    if (l.startsWith("TRACK ")) out.push((t = { title: "", performer: "", start: 0 }));
+    if (l.startsWith("TRACK ")) out.push((t = { title: "", performer: "", start: 0, genre: "", label: "", date: "", cover: "" }));
     else if (t && (m = l.match(/^(TITLE|PERFORMER) "(.*)"$/))) t[m[1].toLowerCase()] = m[2];
+    // Metadatos añadidos por enrich.py
+    else if (t && (m = l.match(/^REM (GENRE|LABEL|DATE|COVER) "?(.*?)"?$/))) t[m[1].toLowerCase()] = m[2];
     else if (t && (m = l.match(/^INDEX 01 (\d+):(\d+):(\d+)/))) t.start = +m[1] * 60 + +m[2] + +m[3] / 75;
   }
   return out;
@@ -65,9 +67,17 @@ function renderTracks() {
   $("timeline").innerHTML = "";
   tracks.forEach((t, i) => {
     const li = document.createElement("li");
-    li.innerHTML = `<span class="n">${i + 1}</span><span><span class="title"></span><br><span class="artist"></span></span><span class="t">${fmt(t.start)}</span>`;
+    li.innerHTML = `<span class="n">${i + 1}</span><span class="cover"></span><span class="info"><span class="title"></span><span class="artist"></span><span class="meta"></span></span><span class="t">${fmt(t.start)}</span>`;
     li.querySelector(".title").textContent = t.title;
     li.querySelector(".artist").textContent = t.performer;
+    li.querySelector(".meta").textContent = [t.date, t.genre, t.label].filter(Boolean).join(" · ");
+    if (t.cover) {
+      const img = document.createElement("img");
+      img.src = t.cover;
+      img.alt = "";
+      img.loading = "lazy";
+      li.querySelector(".cover").append(img);
+    }
     li.onclick = () => seek(t.start);
     $("tracks").append(li);
 
@@ -105,7 +115,12 @@ function update() {
   const t = tracks[idx];
   $("now-playing").textContent = t ? `▶ ${t.performer} — ${t.title}` : " ";
   if ("mediaSession" in navigator && t) {
-    navigator.mediaSession.metadata = new MediaMetadata({ title: t.title, artist: t.performer, album: current.title });
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: t.title,
+      artist: t.performer,
+      album: current.title,
+      artwork: t.cover ? [{ src: new URL(t.cover, location.href).href, sizes: "300x300", type: "image/jpeg" }] : [],
+    });
   }
 }
 

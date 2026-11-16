@@ -76,9 +76,9 @@ audio { width: 100%; margin: 12px 0 8px; }
 .tracks { list-style: none; margin: 8px 0 0; padding: 0; }
 .tracks li {
   display: grid;
-  grid-template-columns: 2.2em 1fr auto;
-  gap: 8px;
-  align-items: baseline;
+  grid-template-columns: 1.6em 48px 1fr auto;
+  gap: 12px;
+  align-items: center;
   padding: 8px 10px;
   border-radius: 8px;
   cursor: pointer;
@@ -88,6 +88,16 @@ audio { width: 100%; margin: 12px 0 8px; }
 .tracks .n, .tracks .t { color: var(--muted); font-variant-numeric: tabular-nums; font-size: .85rem; }
 .tracks .title { font-weight: 600; }
 .tracks .artist { color: var(--muted); }
+.tracks .info { display: flex; flex-direction: column; min-width: 0; }
+.tracks .meta { color: var(--muted); font-size: .8rem; }
+.tracks .cover {
+  width: 48px;
+  height: 48px;
+  border-radius: 4px;
+  background: var(--line);
+  overflow: hidden;
+}
+.tracks .cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
 .sessions { list-style: none; padding: 0; margin: 0 0 48px; }
 .sessions a {
