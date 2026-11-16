@@ -55,7 +55,7 @@ async function load(id) {
   $("session-date").textContent = fmtDate(s.date);
   audio.src = s.audio;
 
-  const res = await fetch(`sessions/${s.id}.cue`);
+  const res = await fetch(`sessions/${s.id}.cue`, { cache: "no-cache" });
   tracks = res.ok ? parseCue(await res.text()) : [];
   renderTracks();
   update();
@@ -147,7 +147,7 @@ if ("mediaSession" in navigator) {
 
 window.addEventListener("hashchange", () => load(location.hash.slice(1)));
 
-fetch("sessions.json")
+fetch("sessions.json", { cache: "no-cache" })
   .then((r) => r.json())
   .then((data) => {
     sessions = data;
