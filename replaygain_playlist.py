@@ -38,9 +38,9 @@ def preguntar(texto):
 
 def medir(ruta):
     """(LUFS integrados, pico de muestra en dBFS) o None si falla."""
-    r = subprocess.run(["ffmpeg", "-hide_banner", "-nostats", "-i", ruta, "-map", "0:a:0",
+    r = subprocess.run(["ffmpeg", "-nostdin", "-hide_banner", "-nostats", "-i", ruta, "-map", "0:a:0",
                         "-af", "ebur128=peak=sample", "-f", "null", "-"],
-                       capture_output=True, text=True)
+                       capture_output=True, text=True, stdin=subprocess.DEVNULL)
     resumen = r.stderr.rsplit("Summary:", 1)[-1]
     i = re.search(r"I:\s*(-?[\d.]+) LUFS", resumen)
     p = re.search(r"Peak:\s*(-?[\d.]+|-inf) dBFS", resumen)
